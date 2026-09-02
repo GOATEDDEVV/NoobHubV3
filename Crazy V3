@@ -386,7 +386,8 @@ bringBtn.MouseButton1Click:Connect(function()
             local bossModel, bossRoot = findBossRoot()
             local char = localPlayer.Character
             if bossRoot and char and char:FindFirstChild("HumanoidRootPart") then
-                bossRoot.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+                -- Increased distance to 8 studs in front and 1 stud higher
+                bossRoot.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0, 1, -8)
             end
         end)
     else
