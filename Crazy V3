@@ -386,7 +386,6 @@ bringBtn.MouseButton1Click:Connect(function()
             local bossModel, bossRoot = findBossRoot()
             local char = localPlayer.Character
             if bossRoot and char and char:FindFirstChild("HumanoidRootPart") then
-                -- Increased distance to 8 studs in front and 1 stud higher
                 bossRoot.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0, 1, -8)
             end
         end)
@@ -446,11 +445,15 @@ pickupBtn.MouseButton1Click:Connect(function()
             local char = localPlayer.Character
             if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 
-            for _, item in ipairs(Workspace:GetChildren()) do
-                if item:IsA("Tool") or item:IsA("Model") then
+            -- Find the Drops folder, fallback to normal Workspace if it doesn't exist
+            local dropsFolder = Workspace:FindFirstChild("Drops") or Workspace:FindFirstChild("drops")
+            local searchArea = dropsFolder and dropsFolder:GetDescendants() or Workspace:GetChildren()
+
+            for _, item in ipairs(searchArea) do
+                if item:IsA("Tool") or item:IsA("Model") or item:IsA("BasePart") then
                     for _, target in ipairs(TARGET_ITEMS) do
                         if string.find(string.lower(item.Name), string.lower(target)) then
-                            local handle = item:FindFirstChild("Handle") or item.PrimaryPart or item:FindFirstChildOfClass("BasePart")
+                            local handle = item:FindFirstChild("Handle") or item.PrimaryPart or (item:IsA("BasePart") and item) or item:FindFirstChildOfClass("BasePart")
                             if handle then
                                 handle.CFrame = char.HumanoidRootPart.CFrame
                             end
