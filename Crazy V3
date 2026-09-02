@@ -18,6 +18,7 @@ local expandHitboxEnabled = false
 local speedBoostEnabled = false
 local fullbrightEnabled = false
 local autoPickupItemsEnabled = false
+local gunModifierEnabled = true
 local TOGGLE_KEY = Enum.KeyCode.RightControl
 
 local connectionLoop, bringLoop, godConnection, pickupLoop, fullbrightConnection
@@ -35,7 +36,89 @@ local WEAPON_PRIORITY = {
     "StunStick", "Stun Stick", "Gun", "Rifle", "Pistol", "Shotgun"
 }
 
--- Target and Anchor Logic
+-- ==========================================
+-- GUN MODIFIER ENGINE
+-- ==========================================
+local GunSettings = {
+    InfiniteAmmo = true,
+    RapidFire = true,
+    CustomFireRate = 0.01,
+    AlwaysAuto = true,
+    NoRecoil = true,
+    InstantReload = true,
+    PiercingMax = 99
+}
+
+local function applyGunModifier(tool)
+    if not gunModifierEnabled or not tool or not tool:IsA("Tool") then return end
+    
+    local settingModule = tool:FindFirstChild("Setting")
+    if settingModule and settingModule:IsA("ModuleScript") then
+        local success, settingTable = pcall(function()
+            return require(settingModule)
+        end)
+
+        if success and type(settingTable) == "table" then
+            if GunSettings.InfiniteAmmo then
+                settingTable.AmmoPerClip = 999999
+                settingTable.MaxClip = 999999
+                settingTable.LimitedClipEnabled = false
+            end
+
+            if GunSettings.RapidFire then
+                settingTable.FireRate = GunSettings.CustomFireRate
+                settingTable.ShotDelay = 0
+                settingTable.BurstRate = 0
+            end
+
+            if GunSettings.AlwaysAuto then
+                settingTable.Auto = true
+                settingTable.AutoShotgunEnabled = true
+            end
+
+            if GunSettings.NoRecoil then
+                settingTable.CameraShakingEnabled = false
+                settingTable.Intensity = 0
+                settingTable.Spread = 0
+                settingTable.SpreadRedution = 1
+            end
+
+            if GunSettings.InstantReload then
+                settingTable.ReloadTime = 0
+                settingTable.ShellClipinSpeed = 0
+            end
+
+            if GunSettings.PiercingMax then
+                settingTable.Piercing = GunSettings.PiercingMax
+            end
+        end
+    end
+end
+
+local function setupCharacterModifier(char)
+    if not char then return end
+
+    char.ChildAdded:Connect(function(child)
+        if child:IsA("Tool") then
+            applyGunModifier(child)
+        end
+    end)
+
+    for _, child in ipairs(char:GetChildren()) do
+        if child:IsA("Tool") then
+            applyGunModifier(child)
+        end
+    end
+end
+
+localPlayer.CharacterAdded:Connect(setupCharacterModifier)
+if localPlayer.Character then
+    setupCharacterModifier(localPlayer.Character)
+end
+
+-- ==========================================
+-- TARGET & ANCHOR LOGIC
+-- ==========================================
 local function findBossRoot()
     for _, obj in ipairs(Workspace:GetDescendants()) do
         if obj:IsA("Model") and string.lower(obj.Name) == string.lower(TARGET_NAME) then
@@ -66,7 +149,9 @@ local function applyImmuneHeadAnchor(targetModel, targetRoot)
     hrp.CFrame = CFrame.new(headPart.Position + Vector3.new(0, 5, 0), headPart.Position)
 end
 
--- Weapon Handling
+-- ==========================================
+-- WEAPON HANDLING
+-- ==========================================
 local function getBestWeapon()
     local character = localPlayer.Character
     local backpack = localPlayer:FindFirstChild("Backpack")
@@ -108,6 +193,8 @@ local function equipAndAttack()
         if bestTool.Parent ~= character then
             humanoid:EquipTool(bestTool)
         end
+        
+        applyGunModifier(bestTool)
         bestTool:Activate()
 
         local bossModel, bossRoot = findBossRoot()
@@ -123,15 +210,17 @@ local function equipAndAttack()
     end
 end
 
--- GUI Setup (Light Theme)
+-- ==========================================
+-- GUI SETUP
+-- ==========================================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "NoobHubImperial"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 700, 0, 340)
-mainFrame.Position = UDim2.new(0.5, -350, 0.5, -170)
+mainFrame.Size = UDim2.new(0, 700, 0, 380)
+mainFrame.Position = UDim2.new(0.5, -350, 0.5, -190)
 mainFrame.BackgroundColor3 = Color3.fromRGB(245, 246, 250)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -221,7 +310,7 @@ uiGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 uiGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 uiGridLayout.Parent = scrollingContainer
 
--- Window Controls
+-- Controls
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 32, 0, 32)
 closeBtn.Position = UDim2.new(1, -40, 0, 8)
@@ -259,7 +348,7 @@ minimizeCorner.Parent = minimizeBtn
 minimizeBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
     scrollingContainer.Visible = not minimized
-    mainFrame.Size = minimized and UDim2.new(0, 700, 0, 48) or UDim2.new(0, 700, 0, 340)
+    mainFrame.Size = minimized and UDim2.new(0, 700, 0, 48) or UDim2.new(0, 700, 0, 380)
     minimizeBtn.Text = minimized and "+" or "—"
 end)
 
@@ -267,7 +356,6 @@ toggleButton.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
 end)
 
--- Button Helper
 local function createButton(text, order)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 218, 0, 44)
@@ -306,7 +394,9 @@ local function createButton(text, order)
     return btn, btnGradient, stroke
 end
 
--- Action Buttons Setup
+-- ==========================================
+-- BUTTON SETUP
+-- ==========================================
 local caveABtn = createButton("⛰️ Teleport Cave A", 1)
 local caveBBtn = createButton("⛰️ Teleport Cave B", 2)
 local safezoneBtn = createButton("🛡️ Safezone TP", 3)
@@ -318,8 +408,8 @@ local hitboxBtn, hitGrad, hitStroke = createButton("📦 Expand Hitbox: OFF", 8)
 local speedBtn, speedGrad, speedStroke = createButton("⚡ Speed Boost: OFF", 9)
 local fogBtn, fogGrad, fogStroke = createButton("💡 Fullbright: OFF", 10)
 local pickupBtn, pickupGrad, pickupStroke = createButton("🎁 Auto Pickup Items: OFF", 11)
+local modBtn, modGrad, modStroke = createButton("🔫 Gun Modifier: ON", 12)
 
--- Helper for active state styling
 local function setButtonActive(btn, grad, stroke, active, textOn, textOff)
     btn.Text = active and textOn or textOff
     if active then
@@ -333,7 +423,8 @@ local function setButtonActive(btn, grad, stroke, active, textOn, textOff)
     end
 end
 
--- Keybind Toggle
+setButtonActive(modBtn, modGrad, modStroke, true, "🔫 Gun Modifier: ON", "🔫 Gun Modifier: OFF")
+
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == TOGGLE_KEY then
@@ -341,7 +432,16 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Feature Logic Connections
+-- Feature Connections
+modBtn.MouseButton1Click:Connect(function()
+    gunModifierEnabled = not gunModifierEnabled
+    setButtonActive(modBtn, modGrad, modStroke, gunModifierEnabled, "🔫 Gun Modifier: ON", "🔫 Gun Modifier: OFF")
+    if gunModifierEnabled and localPlayer.Character then
+        local tool = localPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool then applyGunModifier(tool) end
+    end
+end)
+
 autoKillBtn.MouseButton1Click:Connect(function()
     autoKillEnabled = not autoKillEnabled
     setButtonActive(autoKillBtn, autoKillGrad, autoKillStroke, autoKillEnabled, "⚔️ Auto Kill: ON", "⚔️ Auto Kill: OFF")
@@ -445,7 +545,6 @@ pickupBtn.MouseButton1Click:Connect(function()
             local char = localPlayer.Character
             if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 
-            -- Find the Drops folder, fallback to normal Workspace if it doesn't exist
             local dropsFolder = Workspace:FindFirstChild("Drops") or Workspace:FindFirstChild("drops")
             local searchArea = dropsFolder and dropsFolder:GetDescendants() or Workspace:GetChildren()
 
@@ -467,7 +566,6 @@ pickupBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Teleport Buttons
 caveABtn.MouseButton1Click:Connect(function()
     local char = localPlayer.Character
     if char and char:FindFirstChild("HumanoidRootPart") then
