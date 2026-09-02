@@ -123,7 +123,7 @@ local function equipAndAttack()
     end
 end
 
--- GUI Setup
+-- GUI Setup (Light Theme)
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "NoobHubImperial"
 screenGui.ResetOnSpawn = false
@@ -132,7 +132,7 @@ screenGui.Parent = playerGui
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 700, 0, 340)
 mainFrame.Position = UDim2.new(0.5, -350, 0.5, -170)
-mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+mainFrame.BackgroundColor3 = Color3.fromRGB(245, 246, 250)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
@@ -140,9 +140,9 @@ mainFrame.Parent = screenGui
 
 local mainGradient = Instance.new("UIGradient")
 mainGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 30)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(15, 15, 18)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 12))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(240, 242, 248)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(225, 228, 238))
 })
 mainGradient.Rotation = 45
 mainGradient.Parent = mainFrame
@@ -152,9 +152,8 @@ frameCorner.CornerRadius = UDim.new(0, 16)
 frameCorner.Parent = mainFrame
 
 local frameStroke = Instance.new("UIStroke")
-frameStroke.Thickness = 2.5
-frameStroke.Color = Color3.fromRGB(230, 180, 50)
-frameStroke.Transparency = 0.1
+frameStroke.Thickness = 2
+frameStroke.Color = Color3.fromRGB(210, 215, 230)
 frameStroke.Parent = mainFrame
 
 local titleBar = Instance.new("Frame")
@@ -164,8 +163,8 @@ titleBar.Parent = mainFrame
 
 local titleGradient = Instance.new("UIGradient")
 titleGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 35)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(18, 18, 22))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(230, 235, 245)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(210, 218, 232))
 })
 titleGradient.Parent = titleBar
 
@@ -178,7 +177,7 @@ titleText.Size = UDim2.new(1, -220, 1, 0)
 titleText.Position = UDim2.new(0, 16, 0, 0)
 titleText.BackgroundTransparency = 1
 titleText.Text = "👑 NOOB HUB V2 — Imperial Edition"
-titleText.TextColor3 = Color3.fromRGB(255, 220, 100)
+titleText.TextColor3 = Color3.fromRGB(40, 45, 60)
 titleText.TextXAlignment = Enum.TextXAlignment.Left
 titleText.Font = Enum.Font.GothamBold
 titleText.TextSize = 16
@@ -187,9 +186,9 @@ titleText.Parent = titleBar
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0, 140, 0, 42)
 toggleButton.Position = UDim2.new(0, 15, 0.4, 0)
-toggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+toggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 toggleButton.Text = "👑 NOOB HUB V2"
-toggleButton.TextColor3 = Color3.fromRGB(255, 215, 0)
+toggleButton.TextColor3 = Color3.fromRGB(40, 45, 60)
 toggleButton.Font = Enum.Font.GothamBold
 toggleButton.TextSize = 13
 toggleButton.Active = true
@@ -202,7 +201,7 @@ toggleCorner.Parent = toggleButton
 
 local toggleStroke = Instance.new("UIStroke")
 toggleStroke.Thickness = 2
-toggleStroke.Color = Color3.fromRGB(230, 180, 50)
+toggleStroke.Color = Color3.fromRGB(200, 205, 220)
 toggleStroke.Parent = toggleButton
 
 local scrollingContainer = Instance.new("ScrollingFrame")
@@ -212,10 +211,10 @@ scrollingContainer.BackgroundTransparency = 1
 scrollingContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
 scrollingContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
 scrollingContainer.ScrollBarThickness = 5
-scrollingContainer.ScrollBarImageColor3 = Color3.fromRGB(230, 180, 50)
+scrollingContainer.ScrollBarImageColor3 = Color3.fromRGB(180, 185, 200)
 scrollingContainer.Parent = mainFrame
 
-local uiGridLayout = Instance.new("UIGradientLayout") or Instance.new("UIGridLayout")
+local uiGridLayout = Instance.new("UIGridLayout")
 uiGridLayout.CellSize = UDim2.new(0, 218, 0, 44)
 uiGridLayout.CellPadding = UDim2.new(0, 10, 0, 10)
 uiGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -226,7 +225,7 @@ uiGridLayout.Parent = scrollingContainer
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 32, 0, 32)
 closeBtn.Position = UDim2.new(1, -40, 0, 8)
-closeBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 50)
+closeBtn.BackgroundColor3 = Color3.fromRGB(235, 87, 87)
 closeBtn.Text = "✕"
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeBtn.Font = Enum.Font.GothamBold
@@ -246,7 +245,7 @@ local minimized = false
 local minimizeBtn = Instance.new("TextButton")
 minimizeBtn.Size = UDim2.new(0, 32, 0, 32)
 minimizeBtn.Position = UDim2.new(1, -78, 0, 8)
-minimizeBtn.BackgroundColor3 = Color3.fromRGB(200, 150, 40)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(242, 153, 74)
 minimizeBtn.Text = "—"
 minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 minimizeBtn.Font = Enum.Font.GothamBold
@@ -274,7 +273,7 @@ local function createButton(text, order)
     btn.Size = UDim2.new(0, 218, 0, 44)
     btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(240, 240, 240)
+    btn.TextColor3 = Color3.fromRGB(50, 55, 70)
     btn.Font = Enum.Font.GothamSemibold
     btn.TextSize = 12
     btn.LayoutOrder = order
@@ -282,8 +281,8 @@ local function createButton(text, order)
 
     local btnGradient = Instance.new("UIGradient")
     btnGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(32, 32, 38)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(18, 18, 22))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(235, 238, 245))
     })
     btnGradient.Parent = btn
 
@@ -293,16 +292,15 @@ local function createButton(text, order)
 
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 1.2
-    stroke.Color = Color3.fromRGB(200, 160, 60)
-    stroke.Transparency = 0.4
+    stroke.Color = Color3.fromRGB(210, 215, 225)
     stroke.Parent = btn
 
     btn.MouseEnter:Connect(function()
-        TweenService:Create(stroke, TweenInfo.new(0.2), { Transparency = 0, Color = Color3.fromRGB(255, 215, 0) }):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.2), { Color = Color3.fromRGB(100, 140, 255) }):Play()
     end)
 
     btn.MouseLeave:Connect(function()
-        TweenService:Create(stroke, TweenInfo.new(0.2), { Transparency = 0.4, Color = Color3.fromRGB(200, 160, 60) }):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.2), { Color = Color3.fromRGB(210, 215, 225) }):Play()
     end)
 
     return btn, btnGradient, stroke
@@ -321,6 +319,20 @@ local speedBtn, speedGrad, speedStroke = createButton("⚡ Speed Boost: OFF", 9)
 local fogBtn, fogGrad, fogStroke = createButton("💡 Fullbright: OFF", 10)
 local pickupBtn, pickupGrad, pickupStroke = createButton("🎁 Auto Pickup Items: OFF", 11)
 
+-- Helper for active state styling
+local function setButtonActive(btn, grad, stroke, active, textOn, textOff)
+    btn.Text = active and textOn or textOff
+    if active then
+        grad.Color = ColorSequence.new(Color3.fromRGB(210, 245, 225), Color3.fromRGB(175, 230, 200))
+        stroke.Color = Color3.fromRGB(40, 180, 100)
+        btn.TextColor3 = Color3.fromRGB(15, 80, 40)
+    else
+        grad.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(235, 238, 245))
+        stroke.Color = Color3.fromRGB(210, 215, 225)
+        btn.TextColor3 = Color3.fromRGB(50, 55, 70)
+    end
+end
+
 -- Keybind Toggle
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -332,9 +344,7 @@ end)
 -- Feature Logic Connections
 autoKillBtn.MouseButton1Click:Connect(function()
     autoKillEnabled = not autoKillEnabled
-    autoKillBtn.Text = autoKillEnabled and "⚔️ Auto Kill: ON" or "⚔️ Auto Kill: OFF"
-    autoKillGrad.Color = autoKillEnabled and ColorSequence.new(Color3.fromRGB(20, 120, 70), Color3.fromRGB(10, 70, 40)) or ColorSequence.new(Color3.fromRGB(32, 32, 38), Color3.fromRGB(18, 18, 22))
-    autoKillStroke.Color = autoKillEnabled and Color3.fromRGB(50, 255, 150) or Color3.fromRGB(200, 160, 60)
+    setButtonActive(autoKillBtn, autoKillGrad, autoKillStroke, autoKillEnabled, "⚔️ Auto Kill: ON", "⚔️ Auto Kill: OFF")
 
     if autoKillEnabled then
         connectionLoop = RunService.Heartbeat:Connect(function()
@@ -351,9 +361,7 @@ end)
 
 godModeBtn.MouseButton1Click:Connect(function()
     godmodeEnabled = not godmodeEnabled
-    godModeBtn.Text = godmodeEnabled and "🛡️ God Mode: ON" or "🛡️ God Mode: OFF"
-    godGrad.Color = godmodeEnabled and ColorSequence.new(Color3.fromRGB(20, 120, 70), Color3.fromRGB(10, 70, 40)) or ColorSequence.new(Color3.fromRGB(32, 32, 38), Color3.fromRGB(18, 18, 22))
-    godStroke.Color = godmodeEnabled and Color3.fromRGB(50, 255, 150) or Color3.fromRGB(200, 160, 60)
+    setButtonActive(godModeBtn, godGrad, godStroke, godmodeEnabled, "🛡️ God Mode: ON", "🛡️ God Mode: OFF")
 
     if godmodeEnabled then
         godConnection = RunService.Heartbeat:Connect(function()
@@ -371,9 +379,7 @@ end)
 
 bringBtn.MouseButton1Click:Connect(function()
     bringBossEnabled = not bringBossEnabled
-    bringBtn.Text = bringBossEnabled and "🧲 Bring " .. DISPLAY_TARGET_NAME .. ": ON" or "🧲 Bring " .. DISPLAY_TARGET_NAME .. ": OFF"
-    bringGrad.Color = bringBossEnabled and ColorSequence.new(Color3.fromRGB(20, 120, 70), Color3.fromRGB(10, 70, 40)) or ColorSequence.new(Color3.fromRGB(32, 32, 38), Color3.fromRGB(18, 18, 22))
-    bringStroke.Color = bringBossEnabled and Color3.fromRGB(50, 255, 150) or Color3.fromRGB(200, 160, 60)
+    setButtonActive(bringBtn, bringGrad, bringStroke, bringBossEnabled, "🧲 Bring " .. DISPLAY_TARGET_NAME .. ": ON", "🧲 Bring " .. DISPLAY_TARGET_NAME .. ": OFF")
 
     if bringBossEnabled then
         bringLoop = RunService.Heartbeat:Connect(function()
@@ -390,9 +396,7 @@ end)
 
 hitboxBtn.MouseButton1Click:Connect(function()
     expandHitboxEnabled = not expandHitboxEnabled
-    hitboxBtn.Text = expandHitboxEnabled and "📦 Expand Hitbox: ON" or "📦 Expand Hitbox: OFF"
-    hitGrad.Color = expandHitboxEnabled and ColorSequence.new(Color3.fromRGB(20, 120, 70), Color3.fromRGB(10, 70, 40)) or ColorSequence.new(Color3.fromRGB(32, 32, 38), Color3.fromRGB(18, 18, 22))
-    hitStroke.Color = expandHitboxEnabled and Color3.fromRGB(50, 255, 150) or Color3.fromRGB(200, 160, 60)
+    setButtonActive(hitboxBtn, hitGrad, hitStroke, expandHitboxEnabled, "📦 Expand Hitbox: ON", "📦 Expand Hitbox: OFF")
 
     local bossModel, bossRoot = findBossRoot()
     if bossRoot then
@@ -409,9 +413,7 @@ end)
 
 speedBtn.MouseButton1Click:Connect(function()
     speedBoostEnabled = not speedBoostEnabled
-    speedBtn.Text = speedBoostEnabled and "⚡ Speed Boost: ON" or "⚡ Speed Boost: OFF"
-    speedGrad.Color = speedBoostEnabled and ColorSequence.new(Color3.fromRGB(20, 120, 70), Color3.fromRGB(10, 70, 40)) or ColorSequence.new(Color3.fromRGB(32, 32, 38), Color3.fromRGB(18, 18, 22))
-    speedStroke.Color = speedBoostEnabled and Color3.fromRGB(50, 255, 150) or Color3.fromRGB(200, 160, 60)
+    setButtonActive(speedBtn, speedGrad, speedStroke, speedBoostEnabled, "⚡ Speed Boost: ON", "⚡ Speed Boost: OFF")
 
     local character = localPlayer.Character
     if character and character:FindFirstChildOfClass("Humanoid") then
@@ -421,9 +423,7 @@ end)
 
 fogBtn.MouseButton1Click:Connect(function()
     fullbrightEnabled = not fullbrightEnabled
-    fogBtn.Text = fullbrightEnabled and "💡 Fullbright: ON" or "💡 Fullbright: OFF"
-    fogGrad.Color = fullbrightEnabled and ColorSequence.new(Color3.fromRGB(20, 120, 70), Color3.fromRGB(10, 70, 40)) or ColorSequence.new(Color3.fromRGB(32, 32, 38), Color3.fromRGB(18, 18, 22))
-    fogStroke.Color = fullbrightEnabled and Color3.fromRGB(50, 255, 150) or Color3.fromRGB(200, 160, 60)
+    setButtonActive(fogBtn, fogGrad, fogStroke, fullbrightEnabled, "💡 Fullbright: ON", "💡 Fullbright: OFF")
 
     if fullbrightEnabled then
         Lighting.Ambient = Color3.fromRGB(255, 255, 255)
@@ -438,9 +438,7 @@ end)
 
 pickupBtn.MouseButton1Click:Connect(function()
     autoPickupItemsEnabled = not autoPickupItemsEnabled
-    pickupBtn.Text = autoPickupItemsEnabled and "🎁 Auto Pickup Items: ON" or "🎁 Auto Pickup Items: OFF"
-    pickupGrad.Color = autoPickupItemsEnabled and ColorSequence.new(Color3.fromRGB(20, 120, 70), Color3.fromRGB(10, 70, 40)) or ColorSequence.new(Color3.fromRGB(32, 32, 38), Color3.fromRGB(18, 18, 22))
-    pickupStroke.Color = autoPickupItemsEnabled and Color3.fromRGB(50, 255, 150) or Color3.fromRGB(200, 160, 60)
+    setButtonActive(pickupBtn, pickupGrad, pickupStroke, autoPickupItemsEnabled, "🎁 Auto Pickup Items: ON", "🎁 Auto Pickup Items: OFF")
 
     if autoPickupItemsEnabled then
         pickupLoop = RunService.Heartbeat:Connect(function()
