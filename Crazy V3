@@ -4,6 +4,8 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualUser = game:GetService("VirtualUser")
 
 local localPlayer = Players.LocalPlayer
 local playerGui = localPlayer:WaitForChild("PlayerGui")
@@ -19,9 +21,11 @@ local speedBoostEnabled = false
 local fullbrightEnabled = false
 local autoPickupItemsEnabled = false
 local gunModifierEnabled = true
+local autoEscapeEnabled = false
+local triggerBotEnabled = false
 local TOGGLE_KEY = Enum.KeyCode.RightControl
 
-local connectionLoop, bringLoop, godConnection, pickupLoop, fullbrightConnection
+local connectionLoop, bringLoop, godConnection, pickupLoop, fullbrightConnection, escapeConnection, triggerBotConnection
 
 local TARGET_ITEMS = {
     "GoldenApple", "LegendaryEnergy", "IgnitionFlame", 
@@ -37,59 +41,82 @@ local WEAPON_PRIORITY = {
 }
 
 -- ==========================================
--- GUN MODIFIER ENGINE
+-- REPLICATEDSTORAGE ROCK TELEPORT
 -- ==========================================
-local GunSettings = {
-    InfiniteAmmo = true,
-    RapidFire = true,
-    CustomFireRate = 0.01,
-    AlwaysAuto = true,
-    NoRecoil = true,
-    InstantReload = true,
-    PiercingMax = 99
-}
+local function teleportToReplicatedRock()
+    local char = localPlayer.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
 
+    local rock = ReplicatedStorage:FindFirstChild("Rock")
+    if not rock then return end
+
+    if rock:IsA("BasePart") then
+        hrp.CFrame = rock.CFrame + Vector3.new(0, 3, 0)
+    elseif rock:IsA("Model") then
+        local rockPart = rock.PrimaryPart or rock:FindFirstChildOfClass("BasePart")
+        if rockPart then
+            hrp.CFrame = rockPart.CFrame + Vector3.new(0, 3, 0)
+        end
+    end
+end
+
+-- ==========================================
+-- GUN MODIFIER ENGINE (DIRECT LOCALSCRIPT MOD)
+-- ==========================================
 local function applyGunModifier(tool)
     if not gunModifierEnabled or not tool or not tool:IsA("Tool") then return end
     
-    local settingModule = tool:FindFirstChild("Setting")
+    local settingModule = tool:FindFirstChild("Setting") or tool:FindFirstChild("Settings")
     if settingModule and settingModule:IsA("ModuleScript") then
         local success, settingTable = pcall(function()
             return require(settingModule)
         end)
 
         if success and type(settingTable) == "table" then
-            if GunSettings.InfiniteAmmo then
-                settingTable.AmmoPerClip = 999999
-                settingTable.MaxClip = 999999
-                settingTable.LimitedClipEnabled = false
+            settingTable.AmmoPerClip = 999999
+            settingTable.MaxClip = 999999
+            settingTable.LimitedClipEnabled = false
+            settingTable.FireRate = 0.01
+            settingTable.ShotDelay = 0
+            settingTable.Auto = true
+            settingTable.CameraShakingEnabled = false
+            settingTable.Intensity = 0
+            settingTable.Spread = 0
+            settingTable.ReloadTime = 0
+        end
+    end
+
+    for _, scriptObj in ipairs(tool:GetDescendants()) do
+        if scriptObj:IsA("LocalScript") then
+            if getsenv then
+                local success, env = pcall(getsenv, scriptObj)
+                if success and type(env) == "table" then
+                    for key, _ in pairs(env) do
+                        local kLower = string.lower(tostring(key))
+                        if string.find(kLower, "ammo") or string.find(kLower, "clip") then
+                            env[key] = 999999
+                        elseif string.find(kLower, "recoil") or string.find(kLower, "spread") then
+                            env[key] = 0
+                        elseif string.find(kLower, "delay") or string.find(kLower, "cooldown") or string.find(kLower, "firerate") then
+                            env[key] = 0.01
+                        elseif string.find(kLower, "auto") then
+                            env[key] = true
+                        end
+                    end
+                end
             end
 
-            if GunSettings.RapidFire then
-                settingTable.FireRate = GunSettings.CustomFireRate
-                settingTable.ShotDelay = 0
-                settingTable.BurstRate = 0
-            end
-
-            if GunSettings.AlwaysAuto then
-                settingTable.Auto = true
-                settingTable.AutoShotgunEnabled = true
-            end
-
-            if GunSettings.NoRecoil then
-                settingTable.CameraShakingEnabled = false
-                settingTable.Intensity = 0
-                settingTable.Spread = 0
-                settingTable.SpreadRedution = 1
-            end
-
-            if GunSettings.InstantReload then
-                settingTable.ReloadTime = 0
-                settingTable.ShellClipinSpeed = 0
-            end
-
-            if GunSettings.PiercingMax then
-                settingTable.Piercing = GunSettings.PiercingMax
+            if getupvalues and setupvalue then
+                local success, upvalues = pcall(getupvalues, scriptObj)
+                if success and type(upvalues) == "table" then
+                    for index, val in pairs(upvalues) do
+                        if type(val) == "number" and val > 0 and val < 50 then
+                            setupvalue(scriptObj, index, 999999)
+                        end
+                    end
+                end
             end
         end
     end
@@ -100,6 +127,7 @@ local function setupCharacterModifier(char)
 
     char.ChildAdded:Connect(function(child)
         if child:IsA("Tool") then
+            task.wait(0.1)
             applyGunModifier(child)
         end
     end)
@@ -210,6 +238,20 @@ local function equipAndAttack()
     end
 end
 
+local function equipSlotOne()
+    local backpack = localPlayer:FindFirstChild("Backpack")
+    local char = localPlayer.Character
+    if not backpack or not char then return end
+
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+
+    local slotOneTool = backpack:GetChildren()[1]
+    if slotOneTool and slotOneTool:IsA("Tool") then
+        hum:EquipTool(slotOneTool)
+    end
+end
+
 -- ==========================================
 -- GUI SETUP
 -- ==========================================
@@ -219,8 +261,8 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 700, 0, 380)
-mainFrame.Position = UDim2.new(0.5, -350, 0.5, -190)
+mainFrame.Size = UDim2.new(0, 700, 0, 420)
+mainFrame.Position = UDim2.new(0.5, -350, 0.5, -210)
 mainFrame.BackgroundColor3 = Color3.fromRGB(245, 246, 250)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -310,7 +352,6 @@ uiGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 uiGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 uiGridLayout.Parent = scrollingContainer
 
--- Controls
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 32, 0, 32)
 closeBtn.Position = UDim2.new(1, -40, 0, 8)
@@ -348,7 +389,7 @@ minimizeCorner.Parent = minimizeBtn
 minimizeBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
     scrollingContainer.Visible = not minimized
-    mainFrame.Size = minimized and UDim2.new(0, 700, 0, 48) or UDim2.new(0, 700, 0, 380)
+    mainFrame.Size = minimized and UDim2.new(0, 700, 0, 48) or UDim2.new(0, 700, 0, 420)
     minimizeBtn.Text = minimized and "+" or "—"
 end)
 
@@ -409,6 +450,9 @@ local speedBtn, speedGrad, speedStroke = createButton("⚡ Speed Boost: OFF", 9)
 local fogBtn, fogGrad, fogStroke = createButton("💡 Fullbright: OFF", 10)
 local pickupBtn, pickupGrad, pickupStroke = createButton("🎁 Auto Pickup Items: OFF", 11)
 local modBtn, modGrad, modStroke = createButton("🔫 Gun Modifier: ON", 12)
+local rockBtn = createButton("🪨 TP to Rock", 13)
+local escapeBtn, escapeGrad, escapeStroke = createButton("🚨 Auto Escape (20% HP): OFF", 14)
+local triggerBotBtn, triggerGrad, triggerStroke = createButton("🎯 Trigger Bot: OFF", 15)
 
 local function setButtonActive(btn, grad, stroke, active, textOn, textOff)
     btn.Text = active and textOn or textOff
@@ -433,6 +477,75 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 end)
 
 -- Feature Connections
+triggerBotBtn.MouseButton1Click:Connect(function()
+    triggerBotEnabled = not triggerBotEnabled
+    setButtonActive(triggerBotBtn, triggerGrad, triggerStroke, triggerBotEnabled, "🎯 Trigger Bot: ON", "🎯 Trigger Bot: OFF")
+
+    if triggerBotEnabled then
+        local equippedSlotOne = false
+
+        triggerBotConnection = RunService.Heartbeat:Connect(function()
+            local char = localPlayer.Character
+            if not char then return end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
+
+            local bossModel, bossRoot = findBossRoot()
+            if bossModel and bossRoot then
+                local distance = (hrp.Position - bossRoot.Position).Magnitude
+
+                if distance <= 25 then
+                    local equippedTool = char:FindFirstChildOfClass("Tool")
+
+                    if not equippedTool and not equippedSlotOne then
+                        equipSlotOne()
+                        equippedSlotOne = true
+                    end
+
+                    equippedTool = char:FindFirstChildOfClass("Tool")
+                    if equippedTool then
+                        applyGunModifier(equippedTool)
+                        equippedTool:Activate()
+                        VirtualUser:ClickButton1(Vector2.new(0, 0))
+                    end
+                else
+                    equippedSlotOne = false
+                end
+            else
+                equippedSlotOne = false
+            end
+        end)
+    else
+        if triggerBotConnection then triggerBotConnection:Disconnect() end
+    end
+end)
+
+rockBtn.MouseButton1Click:Connect(function()
+    teleportToReplicatedRock()
+end)
+
+escapeBtn.MouseButton1Click:Connect(function()
+    autoEscapeEnabled = not autoEscapeEnabled
+    setButtonActive(escapeBtn, escapeGrad, escapeStroke, autoEscapeEnabled, "🚨 Auto Escape (20% HP): ON", "🚨 Auto Escape (20% HP): OFF")
+
+    if autoEscapeEnabled then
+        escapeConnection = RunService.Heartbeat:Connect(function()
+            local char = localPlayer.Character
+            if char then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum and hum.Health > 0 and hum.MaxHealth > 0 then
+                    local healthPercent = (hum.Health / hum.MaxHealth) * 100
+                    if healthPercent <= 20 then
+                        teleportToReplicatedRock()
+                    end
+                end
+            end
+        end)
+    else
+        if escapeConnection then escapeConnection:Disconnect() end
+    end
+end)
+
 modBtn.MouseButton1Click:Connect(function()
     gunModifierEnabled = not gunModifierEnabled
     setButtonActive(modBtn, modGrad, modStroke, gunModifierEnabled, "🔫 Gun Modifier: ON", "🔫 Gun Modifier: OFF")
@@ -536,6 +649,9 @@ fogBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- ==========================================
+-- RECURSIVE DROPS AUTO PICKUP ENGINE
+-- ==========================================
 pickupBtn.MouseButton1Click:Connect(function()
     autoPickupItemsEnabled = not autoPickupItemsEnabled
     setButtonActive(pickupBtn, pickupGrad, pickupStroke, autoPickupItemsEnabled, "🎁 Auto Pickup Items: ON", "🎁 Auto Pickup Items: OFF")
@@ -543,20 +659,43 @@ pickupBtn.MouseButton1Click:Connect(function()
     if autoPickupItemsEnabled then
         pickupLoop = RunService.Heartbeat:Connect(function()
             local char = localPlayer.Character
-            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+            if not char then return end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
 
-            local dropsFolder = Workspace:FindFirstChild("Drops") or Workspace:FindFirstChild("drops")
-            local searchArea = dropsFolder and dropsFolder:GetDescendants() or Workspace:GetChildren()
+            local dropsFolder = Workspace:FindFirstChild("Drops") or Workspace:FindFirstChild("drops") or Workspace
+            local items = dropsFolder:GetChildren()
 
-            for _, item in ipairs(searchArea) do
-                if item:IsA("Tool") or item:IsA("Model") or item:IsA("BasePart") then
-                    for _, target in ipairs(TARGET_ITEMS) do
-                        if string.find(string.lower(item.Name), string.lower(target)) then
-                            local handle = item:FindFirstChild("Handle") or item.PrimaryPart or (item:IsA("BasePart") and item) or item:FindFirstChildOfClass("BasePart")
-                            if handle then
-                                handle.CFrame = char.HumanoidRootPart.CFrame
+            for _, item in ipairs(items) do
+                local matchesName = false
+                for _, target in ipairs(TARGET_ITEMS) do
+                    if string.find(string.lower(item.Name), string.lower(target)) then
+                        matchesName = true
+                        break
+                    end
+                end
+
+                if matchesName then
+                    local targetPart = nil
+
+                    if item:IsA("BasePart") then
+                        targetPart = item
+                    elseif item:IsA("Model") or item:IsA("Tool") then
+                        targetPart = item:FindFirstChild("Handle") or item.PrimaryPart or item:FindFirstChildOfClass("BasePart")
+                    end
+
+                    if targetPart then
+                        for _, v in ipairs(targetPart:GetChildren()) do
+                            if v:IsA("LinearVelocity") or v:IsA("AngularVelocity") or v:IsA("BodyVelocity") or v:IsA("BodyPosition") then
+                                v:Destroy()
                             end
                         end
+
+                        targetPart.CanCollide = false
+                        targetPart.Anchored = false
+                        targetPart.AssemblyLinearVelocity = Vector3.zero
+                        targetPart.AssemblyAngularVelocity = Vector3.zero
+                        targetPart.CFrame = hrp.CFrame
                     end
                 end
             end
